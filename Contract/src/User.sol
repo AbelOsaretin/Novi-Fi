@@ -5,99 +5,106 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract User {
     address public owner;
-    address public tokenAddress;
-    // uint256 balance;
+    uint256 public tokenAddressCount;
 
-    mapping(address => uint256) public userBalances;
-    mapping(string => address) public ensAddresses;
-    mapping(uint256 => address) public tokenAddresses;
+    mapping(uint256 => address) public tokenAddress;
+    mapping(address => mapping(address => uint256)) public userTokenBalance;
+    mapping(string => address) public userENSName;
 
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
-    event AirtimePurchased(string phoneNumber, uint256 amount);
-    event DataPurchased(string phoneNumber, uint256 amount);
-
-    constructor(address _tokenAddress) {
-        owner = msg.sender;
-        tokenAddress = _tokenAddress;
-    }
+    event TokenAddressSet(
+        uint256 indexed tokenId,
+        address indexed tokenAddress
+    );
+    event ENSNameRegistered(
+        string indexed ensName,
+        address indexed userAddress
+    );
+    // event ENSNameUpdated(
+    //     string indexed oldENSName,
+    //     string indexed newENSName,
+    //     address indexed userAddress
+    // );
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the contract owner");
         _;
     }
 
-    function deposit(uint256 amount) external {
-        require(amount > 0, "Amount must be greater than 0");
-        IERC20(tokenAddress).transferFrom(msg.sender, address(this), amount);
-        userBalances[msg.sender] += amount;
-        emit Deposit(msg.sender, amount);
-    }
-    function withdraw(uint256 amount) external onlyOwner {
-        require(amount <= userBalances[msg.sender], "Insufficient balance");
-        IERC20(tokenAddress).transfer(msg.sender, amount);
-        userBalances[msg.sender] -= amount;
-        emit Withdraw(msg.sender, amount);
+    constructor() {}
+
+    function setTokenAddress(address _tokenAddr) public onlyOwner {
+        require(_tokenAddr != address(0), "Invalid token address");
+        tokenAddressCount++;
+        tokenAddress[tokenAddressCount] = _tokenAddr;
+        emit TokenAddressSet(tokenAddressCount, _tokenAddr);
     }
 
-    function getBalance() external view returns (uint256) {
-        return userBalances[msg.sender];
+    function getTokenAddress(uint256 _tokenId) public view returns (address) {
+        return tokenAddress[_tokenId];
     }
 
-    function transferTokens(address to, uint256 amount) external onlyOwner {
-        require(amount <= userBalances[msg.sender], "Insufficient balance");
-        IERC20(tokenAddress).transfer(to, amount);
-        userBalances[msg.sender] -= amount;
+    function depositTokens(uint256 _tokenId, uint256 _amount) public {
+        require(
+            _tokenId > 0 && _tokenId <= tokenAddressCount,
+            "Invalid token ID"
+        );
+        require(_amount > 0, "Amount must be greater than zero");
+
+        address tokenAddr = tokenAddress[_tokenId];
+        require(tokenAddr != address(0), "Token address not set");
+
+        IERC20(tokenAddr).transferFrom(msg.sender, address(this), _amount);
+        userTokenBalance[msg.sender][tokenAddr] += _amount;
+        emit Deposit(msg.sender, _amount);
     }
 
-    function setENSAddress(string memory ensName, address ensAddress) external {
-        ensAddresses[ensName] = ensAddress;
+    function withdrawTokens(uint256 _tokenId, uint256 _amount) public {
+        require(
+            _tokenId > 0 && _tokenId <= tokenAddressCount,
+            "Invalid token ID"
+        );
+        require(_amount > 0, "Amount must be greater than zero");
+
+        address tokenAddr = tokenAddress[_tokenId];
+        require(tokenAddr != address(0), "Token address not set");
+
+        require(
+            userTokenBalance[msg.sender][tokenAddr] >= _amount,
+            "Insufficient balance"
+        );
+
+        userTokenBalance[msg.sender][tokenAddr] -= _amount;
+        IERC20(tokenAddr).transfer(msg.sender, _amount);
+        emit Withdraw(msg.sender, _amount);
     }
 
-    function getENSAddress(
-        string memory ensName
-    ) external view returns (address) {
-        return ensAddresses[ensName];
+    function getUserTokenBalance(
+        uint256 _tokenId
+    ) public view returns (uint256) {
+        require(
+            _tokenId > 0 && _tokenId <= tokenAddressCount,
+            "Invalid token ID"
+        );
+        address tokenAddr = tokenAddress[_tokenId];
+        return userTokenBalance[msg.sender][tokenAddr];
     }
 
-    function buyAirtime(
-        string memory phoneNumber,
-        uint256 amount
-    ) external onlyOwner {
-        require(amount > 0, "Amount must be greater than 0");
-        require(amount <= userBalances[msg.sender], "Insufficient balance");
-
-        userBalances[msg.sender] -= amount;
-
-        emit AirtimePurchased(phoneNumber, amount);
+    function registerENSName(
+        string memory _ensName,
+        address _userAddress
+    ) public {
+        require(
+            userENSName[_ensName] == address(0),
+            "ENS name already registered"
+        );
+        userENSName[_ensName] = _userAddress;
+        emit ENSNameRegistered(_ensName, _userAddress);
     }
-
-    function buyData(
-        string memory phoneNumber,
-        uint256 amount
-    ) external onlyOwner {
-        require(amount > 0, "Amount must be greater than 0");
-        require(amount <= userBalances[msg.sender], "Insufficient balance");
-
-        userBalances[msg.sender] -= amount;
-
-        emit DataPurchased(phoneNumber, amount);
-    }
-
-    function setTokenAddress(
-        uint256 tokenId,
-        address _tokenAddress
-    ) external onlyOwner {
-        tokenAddresses[tokenId] = _tokenAddress;
-    }
-    function getTokenAddress(uint256 tokenId) external view returns (address) {
-        return tokenAddresses[tokenId];
-    }
-
-    function getTokenBalance() external view returns (uint256) {
-        return IERC20(tokenAddress).balanceOf(address(this));
-    }
-    function getUserTokenBalance(address user) external view returns (uint256) {
-        return IERC20(tokenAddress).balanceOf(user);
+    function getENSNameAddress(
+        string memory _ensName
+    ) public view returns (address) {
+        return userENSName[_ensName];
     }
 }

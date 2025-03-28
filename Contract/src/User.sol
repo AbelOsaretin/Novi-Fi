@@ -21,18 +21,15 @@ contract User {
         string indexed ensName,
         address indexed userAddress
     );
-    // event ENSNameUpdated(
-    //     string indexed oldENSName,
-    //     string indexed newENSName,
-    //     address indexed userAddress
-    // );
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the contract owner");
         _;
     }
 
-    constructor() {}
+    constructor() {
+        owner = msg.sender;
+    }
 
     function setTokenAddress(address _tokenAddr) public onlyOwner {
         require(_tokenAddr != address(0), "Invalid token address");

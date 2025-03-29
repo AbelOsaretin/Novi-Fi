@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NOVA FI Frontend
+
+This directory contains the frontend web application for NOVA FI, built with Next.js.
+
+## Tech Stack
+
+- **Framework**: Next.js
+- **Styling**: TailwindCSS
+- **Blockchain Interaction**: Ethers.js/Wagmi
+- **State Management**: React Context API / Redux (specify which one you're using)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js (v16 or later)
+- npm or yarn
+- Git
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+# OR
+yarn install
+
+# Set up environment variables
+cp .env.example .env.local
+
+# Run the development server
 npm run dev
-# or
+# OR
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+/src
+  /components      # Reusable UI components
+  /pages           # Next.js pages
+  /hooks           # Custom React hooks
+  /contexts        # React context providers
+  /utils           # Utility functions
+  /services        # API and blockchain service integrations
+  /styles          # Global styles and Tailwind configuration
+  /types           # TypeScript type definitions
+  /constants       # Application constants
+```
 
-## Learn More
+## Available Scripts
 
-To learn more about Next.js, take a look at the following resources:
+- `npm run dev` - Start the development server
+- `npm run build` - Build the application for production
+- `npm run start` - Start the production server
+- `npm run lint` - Run ESLint for code quality
+- `npm run test` - Run tests (if configured)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Environment Variables
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a `.env.local` file with the following variables:
 
-## Deploy on Vercel
+```
+NEXT_PUBLIC_API_URL=
+NEXT_PUBLIC_CHAIN_ID=
+NEXT_PUBLIC_INFURA_ID=
+NEXT_PUBLIC_ENS_CONTRACT=
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Connecting to Blockchain
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This application uses Wagmi and Ethers.js to interact with the blockchain. The main wallet connection is handled in the `/src/contexts/WalletContext.tsx` file.
+
+## UI Components
+
+We use a component-based architecture. All reusable UI components are in the `/src/components` directory, organized by feature or type.
+
+## Contributing
+
+1. Follow the established code style and naming conventions
+2. Write descriptive commit messages
+3. Create feature branches from `develop`
+4. Submit PRs to `develop` branch for review
+
+## Build and Deployment
+
+The application is built using Next.js standard build process:
+
+```bash
+npm run build
+```
+
+---
+
+For more detailed information about the NOVA FI project as a whole, please see the main README file in the root directory.

@@ -10,6 +10,9 @@ contract User {
     mapping(uint256 => address) public tokenAddress;
     mapping(address => mapping(address => uint256)) public userTokenBalance;
     mapping(string => address) public userENSName;
+    mapping(address => string) public userFullName;
+    mapping(address => string) public userKycDoc;
+    mapping(address => bool) public userRegistered;
 
     event Deposit(address indexed user, uint256 amount);
     event Withdraw(address indexed user, uint256 amount);
@@ -17,9 +20,11 @@ contract User {
         uint256 indexed tokenId,
         address indexed tokenAddress
     );
-    event ENSNameRegistered(
-        string indexed ensName,
-        address indexed userAddress
+    event UserRegistered(
+        address indexed userAddress,
+        string indexed fullName,
+        string kycDoc,
+        string indexed ensName
     );
 
     modifier onlyOwner() {
@@ -88,20 +93,30 @@ contract User {
         return userTokenBalance[msg.sender][tokenAddr];
     }
 
-    function registerENSName(
+    function registerUser(
         string memory _ensName,
-        address _userAddress
+        string memory _fullName,
+        string memory _kycDoc
     ) public {
         require(
             userENSName[_ensName] == address(0),
             "ENS name already registered"
         );
-        userENSName[_ensName] = _userAddress;
-        emit ENSNameRegistered(_ensName, _userAddress);
+        userENSName[_ensName] = msg.sender;
+        userFullName[msg.sender] = _fullName;
+        userKycDoc[msg.sender] = _kycDoc;
+        userRegistered[msg.sender] = true;
+        emit UserRegistered(msg.sender, _ensName, _fullName, _kycDoc);
     }
     function getENSNameAddress(
         string memory _ensName
     ) public view returns (address) {
         return userENSName[_ensName];
+    }
+    function getUserFullName() public view returns (string memory) {
+        return userFullName[msg.sender];
+    }
+    function getUserKycDoc() public view returns (string memory) {
+        return userKycDoc[msg.sender];
     }
 }

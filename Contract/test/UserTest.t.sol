@@ -89,7 +89,8 @@ contract UserTest is Test {
 
     function testRegisterENSName() public {
         // Register ENS name
-        userContract.registerENSName("testuser.eth", testUser);
+        vm.startPrank(testUser);
+        userContract.registerUser("testuser.eth", "Abel O", "IPFS hash");
 
         // Verify ENS name registration
         address registeredAddress = userContract.getENSNameAddress(
@@ -100,15 +101,17 @@ contract UserTest is Test {
             testUser,
             "ENS name not registered correctly"
         );
+        vm.stopPrank();
     }
 
     function testCannotRegisterDuplicateENSName() public {
         // First registration should succeed
-        userContract.registerENSName("testuser.eth", testUser);
+        userContract.registerUser("testuser.eth", "Abel O", "IPFS hash");
 
         // Second registration should revert
         vm.expectRevert("ENS name already registered");
-        userContract.registerENSName("testuser.eth", address(0x456));
+        // userContract.registerUser("testuser.eth", address(0x456));
+        userContract.registerUser("testuser.eth", "Abel O", "IPFS hash");
     }
 
     function testOnlyOwnerCanSetTokenAddress() public {
